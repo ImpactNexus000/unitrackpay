@@ -18,7 +18,7 @@ class Settings(BaseSettings):
 
     FRONTEND_URL: str = "http://localhost:5173"
 
-    model_config = {"env_file": ".env", "extra": "ignore"}
+    model_config = {"env_file": ("../.env", ".env"), "extra": "ignore"}
 
 
 settings = Settings()
