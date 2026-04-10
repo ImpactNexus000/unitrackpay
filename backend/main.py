@@ -23,12 +23,10 @@ def health_check():
     return {"status": "ok", "app": "UniTrackPay"}
 
 
-from backend.routers import admin, auth, fees, payments
+from backend.routers import admin, auth, fees, notifications, payments
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(fees.router, prefix="/api/me", tags=["Fees & Dashboard"])
 app.include_router(payments.router, prefix="/api/me/payments", tags=["Payments"])
+app.include_router(notifications.router, prefix="/api/me/notifications", tags=["Notifications"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
-
-# Routers to be included as they are built:
-# app.include_router(notifications.router, prefix="/api/me/notifications", tags=["Notifications"])

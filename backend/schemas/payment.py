@@ -33,4 +33,12 @@ class PaymentOut(BaseModel):
     reviewed_at: datetime | None
     reviewed_by: uuid.UUID | None
 
+    reviewed_by_name: str | None = None
+
     model_config = {"from_attributes": True}
+
+
+class PaymentListOut(BaseModel):
+    items: list[PaymentOut]
+    total: int
+    total_confirmed: Decimal

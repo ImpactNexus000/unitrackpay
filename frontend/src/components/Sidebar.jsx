@@ -20,7 +20,7 @@ export default function Sidebar() {
   const navItems = isAdmin ? adminNav : studentNav;
 
   return (
-    <aside className="w-48 bg-gray-50 border-r border-gray-200 flex flex-col min-h-screen">
+    <aside className="hidden md:flex w-48 bg-gray-50 border-r border-gray-200 flex-col min-h-screen">
       <div className="p-4">
         <h1 className="text-sm font-semibold text-gray-900">UniTrackPay</h1>
         <p className="text-xs text-gray-400">University of Hertfordshire</p>
@@ -31,8 +31,9 @@ export default function Sidebar() {
           <NavLink
             key={item.to}
             to={item.to}
+            end={item.to === '/'}
             className={({ isActive }) =>
-              `flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+              `flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
                 isActive
                   ? 'border-l-2 border-gray-900 bg-white font-medium text-gray-900'
                   : 'text-gray-500 hover:text-gray-700'
@@ -45,10 +46,23 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="p-2 border-t border-gray-200">
+      <div className="px-2 pb-2 space-y-0.5">
+        <NavLink
+          to="/settings"
+          className={({ isActive }) =>
+            `flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+              isActive
+                ? 'border-l-2 border-gray-900 bg-white font-medium text-gray-900'
+                : 'text-gray-500 hover:text-gray-700'
+            }`
+          }
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+          Settings
+        </NavLink>
         <button
           onClick={logout}
-          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-gray-700 rounded-md"
+          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-gray-700"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-current" />
           Sign out
