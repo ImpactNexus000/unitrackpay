@@ -22,6 +22,11 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
+    if (!form.email.toLowerCase().endsWith('@herts.ac.uk')) {
+      setError('Only University of Hertfordshire emails (@herts.ac.uk) are allowed');
+      return;
+    }
+
     if (form.password !== form.confirm) {
       setError('Passwords do not match');
       return;

@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const studentNav = [
-  { to: '/', label: 'Overview' },
+  { to: '/dashboard', label: 'Overview' },
   { to: '/log-payment', label: 'Log Payment' },
   { to: '/history', label: 'Payment History' },
   { to: '/receipts', label: 'Receipts' },
@@ -31,7 +31,7 @@ export default function Sidebar() {
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === '/'}
+            end={item.to === '/dashboard'}
             className={({ isActive }) =>
               `flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
                 isActive

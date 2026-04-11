@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const studentItems = [
-  { to: '/', label: 'Home', icon: 'home' },
+  { to: '/dashboard', label: 'Home', icon: 'home' },
   { to: '/log-payment', label: 'Log', icon: 'log' },
   { to: '/history', label: 'Hist', icon: 'history' },
   { to: '/receipts', label: 'Rec', icon: 'receipts' },
@@ -59,7 +59,7 @@ export default function MobileNav() {
         <NavLink
           key={item.to}
           to={item.to}
-          end={item.to === '/' || item.to === '/admin/queue'}
+          end={item.to === '/dashboard' || item.to === '/admin/queue'}
           className={({ isActive }) =>
             `flex flex-col items-center gap-0.5 px-2 py-1 ${
               isActive ? 'font-medium text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'

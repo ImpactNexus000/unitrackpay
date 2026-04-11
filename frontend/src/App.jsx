@@ -6,6 +6,7 @@ import AdminReports from './pages/AdminReports';
 import AdminStudentDetail from './pages/AdminStudentDetail';
 import AdminStudents from './pages/AdminStudents';
 import Dashboard from './pages/Dashboard';
+import Landing from './pages/Landing';
 import LogPayment from './pages/LogPayment';
 import Login from './pages/Login';
 import PaymentHistory from './pages/PaymentHistory';
@@ -19,12 +20,14 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
+          {/* Authenticated routes */}
           <Route element={<Layout />}>
-            {/* Student routes */}
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/log-payment" element={<LogPayment />} />
             <Route path="/history" element={<PaymentHistory />} />
             <Route path="/receipts" element={<Receipts />} />

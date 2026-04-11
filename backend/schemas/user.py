@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 
 
 # --- Request schemas ---
@@ -12,6 +12,13 @@ class UserRegister(BaseModel):
     full_name: str
     password: str
     programme: str | None = None
+
+    @field_validator("email")
+    @classmethod
+    def email_must_be_herts(cls, v: str) -> str:
+        if not v.lower().endswith("@herts.ac.uk"):
+            raise ValueError("Only University of Hertfordshire emails (@herts.ac.uk) are allowed")
+        return v.lower()
 
 
 class UserLogin(BaseModel):

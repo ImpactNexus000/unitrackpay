@@ -16,7 +16,7 @@ export default function Login() {
     setSubmitting(true);
     try {
       const user = await login(email, password);
-      navigate(user.role === 'admin' || user.role === 'super_admin' ? '/admin/queue' : '/');
+      navigate(user.role === 'admin' || user.role === 'super_admin' ? '/admin/queue' : '/dashboard');
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed');
     } finally {
