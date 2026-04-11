@@ -13,6 +13,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Mobile font size boost — prevent text from being too small on phones */
+@media (max-width: 640px) {
+  .text-xs {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+  .text-sm {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+}
+
 /* ---- Dark mode global overrides ---- */
 
 .dark body,
