@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 class PaymentCreate(BaseModel):
     fee_item_id: uuid.UUID | None = None
+    category: str | None = None  # tuition | accommodation | lab | library | other
     amount: Decimal
     payment_date: date
     payment_method: str | None = None  # bank_transfer | card | online_portal | cash
@@ -22,6 +23,7 @@ class PaymentOut(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID
     fee_item_id: uuid.UUID | None
+    category: str | None
     amount: Decimal
     payment_date: date
     payment_method: str | None

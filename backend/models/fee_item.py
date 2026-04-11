@@ -20,6 +20,7 @@ class FeeItem(Base):
     )
     description: Mapped[str | None] = mapped_column(String(255))
     amount_due: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    discount: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     due_date: Mapped[date | None] = mapped_column(Date)
     category: Mapped[str | None] = mapped_column(String(50))
     created_at: Mapped[datetime] = mapped_column(

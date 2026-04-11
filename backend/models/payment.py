@@ -26,6 +26,7 @@ class Payment(Base):
     payment_method: Mapped[str | None] = mapped_column(String(50))
     reference: Mapped[str | None] = mapped_column(String(255))
     notes: Mapped[str | None] = mapped_column(Text)
+    category: Mapped[str | None] = mapped_column(String(50))
     status: Mapped[str] = mapped_column(String(20), default="pending")
     receipt_url: Mapped[str | None] = mapped_column(Text)
     submitted_at: Mapped[datetime] = mapped_column(

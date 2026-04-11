@@ -23,6 +23,7 @@ def create_payment(
     payment = Payment(
         user_id=user.id,
         fee_item_id=payload.fee_item_id,
+        category=payload.category,
         amount=payload.amount,
         payment_date=payload.payment_date,
         payment_method=payload.payment_method,

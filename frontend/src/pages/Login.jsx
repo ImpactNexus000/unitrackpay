@@ -25,10 +25,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-sm bg-white rounded-xl border border-gray-200 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="w-full max-w-sm bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
         <div className="text-center mb-6">
-          <h1 className="text-lg font-semibold text-gray-900">UniTrackPay</h1>
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">UniTrackPay</h1>
           <p className="text-xs text-gray-400 mt-1">Sign in to your account</p>
         </div>
 
@@ -63,7 +63,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-gray-900 text-white text-sm font-medium py-2.5 rounded-lg disabled:opacity-50"
+            className="w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-medium py-2.5 rounded-lg disabled:opacity-50"
           >
             {submitting ? 'Signing in...' : 'Sign in'}
           </button>
@@ -71,7 +71,7 @@ export default function Login() {
 
         <p className="text-xs text-gray-400 text-center mt-4">
           Don't have an account?{' '}
-          <Link to="/register" className="text-gray-900 font-medium">
+          <Link to="/register" className="text-gray-900 dark:text-gray-100 font-medium">
             Register
           </Link>
         </p>

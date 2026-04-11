@@ -16,7 +16,7 @@ export default function Dashboard() {
     return <p className="text-sm text-gray-400">Loading dashboard...</p>;
   }
 
-  const { student, balance } = data;
+  const { student, balance, balance_by_category = [] } = data;
 
   const timelineItems = data.recent_payments.map((p) => ({
     id: p.id,
@@ -33,28 +33,43 @@ export default function Dashboard() {
     <div>
       {/* --- Mobile layout (hidden on md+) --- */}
       <div className="md:hidden">
-        {/* Balance card */}
-        <div className="bg-gray-50 rounded-xl p-4 mb-4 text-center">
-          <p className="text-xs text-gray-400 mb-1">Outstanding balance</p>
-          <p className="text-3xl font-medium text-red-500">
-            £{balance.remaining.toFixed(2)}
-          </p>
+        {/* Per-category balance cards */}
+        <div className="space-y-3 mb-4">
+          {balance_by_category.map((cat) => (
+            <div key={cat.category} className="bg-gray-50 rounded-xl p-4 text-center">
+              <p className="text-xs font-medium text-gray-500 mb-1 capitalize">{cat.label}</p>
+              <p className="text-2xl font-medium text-red-500">
+                £{cat.remaining.toFixed(2)}
+              </p>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span className="text-gray-400">Owed: </span>
+                  <span className="text-red-600 font-medium">£{cat.total_owed.toFixed(2)}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Paid: </span>
+                  <span className="text-green-600 font-medium">£{cat.total_confirmed.toFixed(2)}</span>
+                </div>
+              </div>
+              <div className="mt-2">
+                <div className="h-1.5 bg-gray-200 rounded-full">
+                  <div
+                    className="h-1.5 bg-green-500 rounded-full transition-all"
+                    style={{ width: `${Math.min(cat.progress_pct, 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  {cat.progress_pct}% complete
+                  {cat.total_pending > 0 && ` · £${cat.total_pending.toFixed(2)} pending`}
+                </p>
+              </div>
+            </div>
+          ))}
           {data.next_due && (
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-gray-400 text-center">
               Next payment due: {data.next_due.due_date}
             </p>
           )}
-          <div className="mt-3">
-            <div className="h-2 bg-gray-200 rounded-full">
-              <div
-                className="h-2 bg-green-500 rounded-full transition-all"
-                style={{ width: `${Math.min(balance.progress_pct, 100)}%` }}
-              />
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              £{balance.total_confirmed.toFixed(2)} paid of £{balance.total_owed.toFixed(2)} total
-            </p>
-          </div>
         </div>
 
         {/* Quick action buttons */}
@@ -93,6 +108,7 @@ export default function Dashboard() {
                 <div>
                   <p className="text-sm font-medium text-gray-900">{p.description}</p>
                   <p className="text-xs text-gray-400">
+                    {p.category && <span className="capitalize">{p.category} · </span>}
                     {new Date(p.submitted_at).toLocaleDateString('en-GB')}
                   </p>
                 </div>
@@ -111,12 +127,19 @@ export default function Dashboard() {
         <h2 className="text-lg font-semibold text-gray-900 mb-1">Overview</h2>
         <p className="text-xs text-gray-400 mb-6">Welcome back, {student.name}</p>
 
-        {/* Metric cards */}
-        <div className="grid grid-cols-4 gap-3 mb-6">
-          <MetricCard label="Total owed" value={`£${balance.total_owed.toFixed(2)}`} color="text-red-600" />
-          <MetricCard label="Total paid" value={`£${balance.total_confirmed.toFixed(2)}`} color="text-green-600" />
-          <MetricCard label="Remaining" value={`£${balance.remaining.toFixed(2)}`} color="text-blue-600" />
-          <MetricCard label="Pending review" value={`£${balance.total_pending.toFixed(2)}`} color="text-amber-500" />
+        {/* Per-category metric rows */}
+        <div className="space-y-4 mb-6">
+          {balance_by_category.map((cat) => (
+            <div key={cat.category}>
+              <p className="text-xs font-medium text-gray-500 mb-2 capitalize">{cat.label}</p>
+              <div className="grid grid-cols-4 gap-3">
+                <MetricCard label="Total owed" value={`£${cat.total_owed.toFixed(2)}`} color="text-red-600" />
+                <MetricCard label="Total paid" value={`£${cat.total_confirmed.toFixed(2)}`} color="text-green-600" />
+                <MetricCard label="Remaining" value={`£${cat.remaining.toFixed(2)}`} color="text-blue-600" />
+                <MetricCard label="Pending review" value={`£${cat.total_pending.toFixed(2)}`} color="text-amber-500" />
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Balance bar */}
@@ -149,6 +172,7 @@ export default function Dashboard() {
                 <thead>
                   <tr className="text-gray-400 text-xs font-medium border-b">
                     <th className="text-left pb-2">Description</th>
+                    <th className="text-left pb-2">Category</th>
                     <th className="text-right pb-2">Amount</th>
                     <th className="text-right pb-2">Status</th>
                   </tr>
@@ -157,6 +181,7 @@ export default function Dashboard() {
                   {data.recent_payments.map((p) => (
                     <tr key={p.id} className="border-b">
                       <td className="py-2 font-medium text-gray-900">{p.description}</td>
+                      <td className="py-2 text-gray-500 capitalize">{p.category || '—'}</td>
                       <td className="py-2 text-right text-gray-500">£{p.amount.toFixed(2)}</td>
                       <td className="py-2 text-right">
                         <StatusBadge status={p.status} />

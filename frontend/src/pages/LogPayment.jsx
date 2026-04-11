@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 
 const PAYMENT_TYPES = [
-  { value: '', label: 'Select type' },
+  { value: '', label: 'Select category' },
   { value: 'tuition', label: 'Tuition' },
   { value: 'accommodation', label: 'Accommodation' },
   { value: 'lab', label: 'Lab fees' },
@@ -24,11 +24,18 @@ export default function LogPayment() {
   const [fees, setFees] = useState([]);
   const [form, setForm] = useState({
     fee_item_id: '',
+    category: '',
     amount: '',
     payment_date: new Date().toISOString().split('T')[0],
     payment_method: '',
     reference: '',
     notes: '',
+  });
+  // Fee setup fields (shown when category has no existing fee_item)
+  const [feeSetup, setFeeSetup] = useState({
+    total_amount: '',
+    has_discount: false,
+    discount: '',
   });
   const [file, setFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
@@ -40,6 +47,10 @@ export default function LogPayment() {
   }, []);
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
+
+  // Check if the selected category already has a fee_item
+  const categoryHasFee = fees.some((f) => f.category === form.category);
+  const showFeeSetup = form.category && !categoryHasFee;
 
   const handleFile = (f) => {
     if (!f) return;
@@ -68,6 +79,25 @@ export default function LogPayment() {
     setSubmitting(true);
 
     try {
+      // If this is a new category, create the fee_item first
+      if (showFeeSetup) {
+        if (!feeSetup.total_amount || parseFloat(feeSetup.total_amount) <= 0) {
+          setError('Please enter the total amount owed for this category');
+          setSubmitting(false);
+          return;
+        }
+
+        const feePayload = {
+          category: form.category,
+          total_amount: parseFloat(feeSetup.total_amount),
+          discount: feeSetup.has_discount && feeSetup.discount
+            ? parseFloat(feeSetup.discount)
+            : null,
+        };
+
+        await client.post('/me/fees', feePayload);
+      }
+
       const payload = {
         amount: parseFloat(form.amount),
         payment_date: form.payment_date,
@@ -75,6 +105,7 @@ export default function LogPayment() {
         reference: form.reference || null,
         notes: form.notes || null,
         fee_item_id: form.fee_item_id || null,
+        category: form.category || null,
       };
 
       const { data } = await client.post('/me/payments/', payload);
@@ -109,20 +140,117 @@ export default function LogPayment() {
             )}
 
             <div className="mb-4">
-              <label className="text-xs font-medium text-gray-500 mb-1 block">Payment type</label>
+              <label className="text-xs font-medium text-gray-500 mb-1 block">Payment category</label>
               <select
-                value={form.fee_item_id}
-                onChange={set('fee_item_id')}
+                value={form.category}
+                onChange={(e) => {
+                  setForm({ ...form, category: e.target.value });
+                  setFeeSetup({ total_amount: '', has_discount: false, discount: '' });
+                }}
+                required
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
               >
-                <option value="">Select fee item (optional)</option>
-                {fees.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.description || f.category} — £{Number(f.amount_due).toFixed(2)}
-                  </option>
+                {PAYMENT_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
                 ))}
               </select>
             </div>
+
+            {/* Inline fee setup — only shown for new categories */}
+            {showFeeSetup && (
+              <div className="mb-4 border border-blue-100 bg-blue-50/50 rounded-lg p-3 space-y-3">
+                <p className="text-xs text-blue-700 font-medium">
+                  First time logging {PAYMENT_TYPES.find((t) => t.value === form.category)?.label.toLowerCase()} — set your total owed
+                </p>
+
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">
+                    Total amount owed for {PAYMENT_TYPES.find((t) => t.value === form.category)?.label.toLowerCase()} (£)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    required
+                    value={feeSetup.total_amount}
+                    onChange={(e) => setFeeSetup({ ...feeSetup, total_amount: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
+                    placeholder="e.g. 9250.00"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="has_discount"
+                    checked={feeSetup.has_discount}
+                    onChange={(e) =>
+                      setFeeSetup({ ...feeSetup, has_discount: e.target.checked, discount: '' })
+                    }
+                    className="rounded border-gray-300"
+                  />
+                  <label htmlFor="has_discount" className="text-xs text-gray-600">
+                    Were you given a discount?
+                  </label>
+                </div>
+
+                {feeSetup.has_discount && (
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-1 block">Discount amount (£)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      required
+                      value={feeSetup.discount}
+                      onChange={(e) => setFeeSetup({ ...feeSetup, discount: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
+                      placeholder="e.g. 500.00"
+                    />
+                    {feeSetup.total_amount && feeSetup.discount && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        After discount: £{(parseFloat(feeSetup.total_amount) - parseFloat(feeSetup.discount)).toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Show existing fee info if category already set up */}
+            {form.category && categoryHasFee && (
+              <div className="mb-4 bg-gray-50 rounded-lg p-3">
+                {(() => {
+                  const fee = fees.find((f) => f.category === form.category);
+                  return (
+                    <p className="text-xs text-gray-500">
+                      Total owed: <span className="font-medium text-gray-900">£{Number(fee.amount_due).toFixed(2)}</span>
+                      {fee.discount && (
+                        <span className="text-green-600 ml-1">(£{Number(fee.discount).toFixed(2)} discount applied)</span>
+                      )}
+                    </p>
+                  );
+                })()}
+              </div>
+            )}
+
+            {fees.length > 0 && (
+              <div className="mb-4">
+                <label className="text-xs font-medium text-gray-500 mb-1 block">Link to fee item (optional)</label>
+                <select
+                  value={form.fee_item_id}
+                  onChange={set('fee_item_id')}
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
+                >
+                  <option value="">None</option>
+                  {fees.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.description || f.category} — £{Number(f.amount_due).toFixed(2)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div>

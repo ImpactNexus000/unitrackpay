@@ -22,6 +22,7 @@ class FeeItemOut(BaseModel):
     user_id: uuid.UUID
     description: str | None
     amount_due: Decimal
+    discount: Decimal | None
     due_date: date | None
     category: str | None
     created_at: datetime

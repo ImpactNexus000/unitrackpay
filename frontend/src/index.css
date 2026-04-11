@@ -1,8 +1,86 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 body {
   margin: 0;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* ---- Dark mode global overrides ---- */
+
+.dark body,
+.dark {
+  color-scheme: dark;
+}
+
+/* Base backgrounds */
+.dark .bg-white { background-color: #1a1a2e; }
+.dark .bg-gray-50 { background-color: #16213e; }
+
+/* Text colors */
+.dark .text-gray-900 { color: #e5e5e5; }
+.dark .text-gray-700 { color: #d1d5db; }
+.dark .text-gray-500 { color: #9ca3af; }
+.dark .text-gray-400 { color: #6b7280; }
+
+/* Borders */
+.dark .border-gray-200 { border-color: #374151; }
+.dark .border-gray-100 { border-color: #1f2937; }
+.dark .border-gray-300 { border-color: #4b5563; }
+
+/* Form inputs & selects */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1e293b !important;
+  color: #e5e5e5 !important;
+  border-color: #374151 !important;
+}
+
+.dark input::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Tables */
+.dark th { color: #9ca3af; }
+.dark td { color: #d1d5db; }
+
+/* Cards with border */
+.dark .rounded-xl.border,
+.dark .rounded-lg.border {
+  border-color: #374151;
+}
+
+/* Status badges keep their colors — no override needed */
+
+/* Dashed borders (upload zone, add button) */
+.dark .border-dashed { border-color: #4b5563; }
+
+/* Links */
+.dark .text-blue-500 { color: #60a5fa; }
+
+/* Primary buttons (bg-gray-900 text-white → invert in dark) */
+.dark .bg-gray-900 {
+  background-color: #e5e5e5;
+  color: #111827;
+}
+
+/* Checkbox */
+.dark input[type="checkbox"] {
+  accent-color: #60a5fa;
+}
+
+/* Info panel (fee setup blue box) */
+.dark .bg-blue-50\/50 { background-color: rgba(30, 58, 138, 0.2); }
+.dark .border-blue-100 { border-color: #1e3a5f; }
+.dark .text-blue-700 { color: #93c5fd; }
+
+/* Error panel */
+.dark .bg-red-50 { background-color: rgba(127, 29, 29, 0.2); }
+
+/* Scrollbar */
+.dark ::-webkit-scrollbar { background: #1a1a2e; }
+.dark ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
