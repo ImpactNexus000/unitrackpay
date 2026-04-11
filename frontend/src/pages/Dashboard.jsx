@@ -13,7 +13,7 @@ export default function Dashboard() {
   }, []);
 
   if (!data) {
-    return <p className="text-sm text-gray-400">Loading dashboard...</p>;
+    return <DashboardSkeleton />;
   }
 
   const { student, balance, balance_by_category = [] } = data;
@@ -216,6 +216,55 @@ function MetricCard({ label, value, color }) {
     <div className="bg-gray-50 rounded-lg p-4">
       <p className="text-xs text-gray-400 mb-1">{label}</p>
       <p className={`text-xl font-medium ${color}`}>{value}</p>
+    </div>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div>
+      {/* Mobile skeleton */}
+      <div className="md:hidden space-y-3">
+        {[1, 2].map((i) => (
+          <div key={i} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+            <div className="skeleton h-3 w-20 mx-auto mb-3" />
+            <div className="skeleton h-8 w-32 mx-auto mb-3" />
+            <div className="grid grid-cols-2 gap-2">
+              <div className="skeleton h-3 w-full" />
+              <div className="skeleton h-3 w-full" />
+            </div>
+            <div className="skeleton h-1.5 w-full mt-3 rounded-full" />
+          </div>
+        ))}
+        <div className="grid grid-cols-2 gap-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="skeleton h-20 rounded-lg" />
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop skeleton */}
+      <div className="hidden md:block">
+        <div className="skeleton h-5 w-24 mb-2" />
+        <div className="skeleton h-3 w-40 mb-6" />
+        <div className="space-y-4 mb-6">
+          {[1, 2].map((i) => (
+            <div key={i}>
+              <div className="skeleton h-3 w-16 mb-2" />
+              <div className="grid grid-cols-4 gap-3">
+                {[1, 2, 3, 4].map((j) => (
+                  <div key={j} className="skeleton h-20 rounded-lg" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="skeleton h-16 rounded-xl mb-6" />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="skeleton h-48 rounded-xl" />
+          <div className="skeleton h-48 rounded-xl" />
+        </div>
+      </div>
     </div>
   );
 }

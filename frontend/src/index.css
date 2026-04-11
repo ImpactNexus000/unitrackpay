@@ -88,3 +88,69 @@ body {
 /* Scrollbar */
 .dark ::-webkit-scrollbar { background: #1a1a2e; }
 .dark ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+
+/* ---- Animations ---- */
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes check-draw {
+  from { stroke-dashoffset: 36; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes circle-draw {
+  from { stroke-dashoffset: 166; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+.animate-slide-in { animation: slide-in 0.3s ease-out; }
+.animate-fade-in { animation: fade-in 0.3s ease-out; }
+.animate-check-draw { stroke-dasharray: 36; animation: check-draw 0.4s ease-out 0.2s forwards; stroke-dashoffset: 36; }
+.animate-circle-draw { stroke-dasharray: 166; animation: circle-draw 0.5s ease-out forwards; stroke-dashoffset: 166; }
+.animate-pulse-ring { animation: pulse-ring 1s ease-out forwards; }
+
+/* ---- Skeleton loader ---- */
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
+}
+
+/* ---- Form focus polish ---- */
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.dark input:focus, .dark select:focus, .dark textarea:focus {
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}

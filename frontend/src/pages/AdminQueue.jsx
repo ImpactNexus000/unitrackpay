@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import client from '../api/client';
 import StatusBadge from '../components/StatusBadge';
+import { useToast } from '../context/ToastContext';
 
 export default function AdminQueue() {
   const [data, setData] = useState(null);
   const [reviewNote, setReviewNote] = useState({});
+  const toast = useToast();
 
   const load = () => {
     client.get('/admin/queue').then((res) => setData(res.data));
@@ -18,14 +20,29 @@ export default function AdminQueue() {
         action,
         note: reviewNote[paymentId] || null,
       });
+      toast.success(`Payment ${action === 'confirmed' ? 'confirmed' : 'rejected'} successfully`);
       load();
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to review payment');
+      toast.error(err.response?.data?.detail || 'Failed to review payment');
     }
   };
 
   if (!data) {
-    return <p className="text-sm text-gray-400">Loading queue...</p>;
+    return (
+      <div>
+        <div className="skeleton h-5 w-32 mb-2" />
+        <div className="skeleton h-3 w-56 mb-6" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+          {[1, 2, 3].map((i) => <div key={i} className="skeleton h-20 rounded-lg" />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => <div key={i} className="skeleton h-36 rounded-lg" />)}
+          </div>
+          <div className="skeleton h-48 rounded-xl" />
+        </div>
+      </div>
+    );
   }
 
   const { metrics, pending_submissions, recent_activity } = data;

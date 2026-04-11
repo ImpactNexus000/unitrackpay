@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import client from '../api/client';
+import { useToast } from '../context/ToastContext';
 
 export default function Login() {
-  const { login } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,9 +16,19 @@ export default function Login() {
     setError('');
     setSubmitting(true);
     try {
-      const user = await login(email, password);
-      navigate(user.role === 'admin' || user.role === 'super_admin' ? '/admin/queue' : '/dashboard');
+      const { data } = await client.post('/auth/login', { email, password });
+
+      if (data.requires_verification) {
+        toast.info('Verification code sent to your email');
+        navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+        return;
+      }
     } catch (err) {
+      if (err.response?.status === 403) {
+        toast.info('Please verify your email first');
+        navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+        return;
+      }
       setError(err.response?.data?.detail || 'Login failed');
     } finally {
       setSubmitting(false);

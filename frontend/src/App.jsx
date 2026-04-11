@@ -14,6 +14,7 @@ import Notifications from './pages/Notifications';
 import Receipts from './pages/Receipts';
 import Register from './pages/Register';
 import Settings from './pages/Settings';
+import VerifyEmail from './pages/VerifyEmail';
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
 
           {/* Authenticated routes */}
           <Route element={<Layout />}>

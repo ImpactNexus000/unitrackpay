@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
+import { useToast } from '../context/ToastContext';
 
 const PAYMENT_TYPES = [
   { value: '', label: 'Select category' },
@@ -21,6 +22,7 @@ const PAYMENT_METHODS = [
 
 export default function LogPayment() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [fees, setFees] = useState([]);
   const [form, setForm] = useState({
     fee_item_id: '',
@@ -116,6 +118,7 @@ export default function LogPayment() {
         await client.patch(`/me/payments/${data.id}/receipt`, fd);
       }
 
+      toast.success('Payment submitted successfully!');
       navigate('/history');
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to submit payment');

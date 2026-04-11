@@ -2,6 +2,23 @@ import { useEffect, useState } from 'react';
 import client from '../api/client';
 import StatusBadge from '../components/StatusBadge';
 
+function TableSkeleton() {
+  return (
+    <div>
+      <div className="skeleton h-5 w-36 mb-1" />
+      <div className="skeleton h-3 w-56 mb-4" />
+      <div className="flex gap-2 mb-4">
+        {[1, 2, 3].map((i) => <div key={i} className="skeleton h-8 w-28 rounded-lg" />)}
+      </div>
+      <div className="space-y-3">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="skeleton h-10 w-full rounded-lg" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const PAYMENT_TYPES = [
   { value: '', label: 'All types' },
   { value: 'bank_transfer', label: 'Bank transfer' },
@@ -18,7 +35,7 @@ const STATUS_OPTIONS = [
 ];
 
 export default function PaymentHistory() {
-  const [data, setData] = useState({ items: [], total: 0, total_confirmed: 0 });
+  const [data, setData] = useState(null);
   const [filters, setFilters] = useState({ method: '', status: '', reference: '' });
   const [page, setPage] = useState(1);
   const limit = 20;
@@ -35,6 +52,8 @@ export default function PaymentHistory() {
       .get(`/me/payments/?${params.toString()}`)
       .then((res) => setData(res.data));
   }, [filters, page]);
+
+  if (!data) return <TableSkeleton />;
 
   const setFilter = (key) => (e) => {
     setFilters({ ...filters, [key]: e.target.value });

@@ -28,6 +28,24 @@ def _send(to: str, subject: str, html: str) -> None:
         logger.error("Failed to send email to %s: %s", to, e)
 
 
+def send_verification_code(to: str, student_name: str, code: str) -> None:
+    _send(
+        to=to,
+        subject=f"{code} is your UniTrackPay verification code",
+        html=f"""
+        <h2>Verify your email</h2>
+        <p>Hi {student_name},</p>
+        <p>Your verification code is:</p>
+        <p style="font-size: 32px; font-weight: bold; letter-spacing: 8px;
+           color: #111; background: #f3f4f6; padding: 16px 24px;
+           border-radius: 12px; display: inline-block;">{code}</p>
+        <p>This code expires in <strong>10 minutes</strong>.</p>
+        <p>If you didn't create a UniTrackPay account, you can ignore this email.</p>
+        <p style="color: #999; font-size: 12px;">University of Hertfordshire</p>
+        """,
+    )
+
+
 def send_payment_confirmed(to: str, student_name: str, amount: float) -> None:
     _send(
         to=to,

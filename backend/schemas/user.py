@@ -26,6 +26,15 @@ class UserLogin(BaseModel):
     password: str
 
 
+class VerifyEmail(BaseModel):
+    email: EmailStr
+    code: str
+
+
+class ResendCode(BaseModel):
+    email: EmailStr
+
+
 class TokenRefresh(BaseModel):
     refresh_token: str
 
