@@ -14,7 +14,15 @@ export default function AdminStudents() {
   }, []);
 
   if (loading) {
-    return <p className="text-sm text-gray-400">Loading students...</p>;
+    return (
+      <div>
+        <div className="skeleton h-5 w-32 mb-2" />
+        <div className="skeleton h-3 w-40 mb-6" />
+        <div className="space-y-3">
+          {[1, 2, 3, 4].map((i) => <div key={i} className="skeleton h-24 rounded-lg" />)}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -24,7 +32,48 @@ export default function AdminStudents() {
         {students.length} student{students.length !== 1 ? 's' : ''} registered
       </p>
 
-      <div className="overflow-x-auto">
+      {/* Mobile card layout */}
+      <div className="md:hidden space-y-3">
+        {students.map((s) => (
+          <Link
+            key={s.id}
+            to={`/admin/students/${s.id}`}
+            className="block border border-gray-200 rounded-lg p-4 bg-white"
+          >
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <p className="text-sm font-medium text-gray-900">{s.full_name}</p>
+                <p className="text-xs text-gray-400">{s.student_id} {s.programme ? `· ${s.programme}` : ''}</p>
+              </div>
+              <span className="text-xs text-blue-500 font-medium">View</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 mb-2">
+              <div>
+                <p className="text-xs text-gray-400">Owed</p>
+                <p className="text-sm font-medium text-gray-900">£{s.balance.total_owed.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Paid</p>
+                <p className="text-sm font-medium text-green-600">£{s.balance.total_confirmed.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Left</p>
+                <p className="text-sm font-medium text-red-600">£{s.balance.remaining.toFixed(2)}</p>
+              </div>
+            </div>
+            <div className="h-1.5 bg-gray-200 rounded-full">
+              <div
+                className="h-1.5 bg-green-500 rounded-full transition-all"
+                style={{ width: `${Math.min(s.balance.progress_pct, 100)}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1">{s.balance.progress_pct}% complete</p>
+          </Link>
+        ))}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-xs border-collapse">
           <thead>
             <tr className="text-gray-400 text-xs font-medium border-b">
