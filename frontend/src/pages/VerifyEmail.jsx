@@ -75,7 +75,7 @@ export default function VerifyEmail() {
       const user = await loginWithTokens(data.access_token, data.refresh_token);
       setVerified(true);
       setTimeout(() => {
-        navigate(user.role === 'admin' || user.role === 'super_admin' ? '/admin/queue' : '/dashboard');
+        navigate('/dashboard');
       }, 1800);
     } catch (err) {
       setError(err.response?.data?.detail || 'Verification failed');
