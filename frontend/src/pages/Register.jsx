@@ -37,11 +37,6 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    if (!form.email.toLowerCase().endsWith('@herts.ac.uk')) {
-      setError('Only University of Hertfordshire emails (@herts.ac.uk) are allowed');
-      return;
-    }
-
     if (passingRules < PASSWORD_RULES.length) {
       setError('Password does not meet all requirements');
       return;
@@ -72,7 +67,7 @@ export default function Register() {
   const fields = [
     { key: 'full_name', label: 'Full name', type: 'text', required: true },
     { key: 'student_id', label: 'Student ID', type: 'text', required: true },
-    { key: 'email', label: 'University email', type: 'email', required: true, placeholder: 'you@herts.ac.uk' },
+    { key: 'email', label: 'Email', type: 'email', required: true, placeholder: 'you@example.com' },
     { key: 'programme', label: 'Programme', type: 'text', required: false, placeholder: 'e.g. MSc Molecular Biotechnology' },
     { key: 'password', label: 'Password', type: 'password', required: true },
     { key: 'confirm', label: 'Confirm password', type: 'password', required: true },
@@ -159,9 +154,6 @@ export default function Register() {
         </form>
 
         <p className="text-xs text-gray-400 text-center mt-4">
-          Use your University of Hertfordshire email address
-        </p>
-        <p className="text-xs text-gray-400 text-center mt-2">
           Already have an account?{' '}
           <Link to="/login" className="text-gray-900 dark:text-gray-100 font-medium">
             Sign in

@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     CLOUDINARY_API_SECRET: str = ""
 
     RESEND_API_KEY: str = ""
-    FROM_EMAIL: str = "noreply@unitrackpay.com"
+    FROM_EMAIL: str = "UniTrackPay <noreply@unitrackpay.online>"
 
     FRONTEND_URL: str = "http://localhost:5173"
 

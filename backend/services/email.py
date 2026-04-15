@@ -16,7 +16,7 @@ def _send(to: str, subject: str, html: str) -> None:
     resend.api_key = settings.RESEND_API_KEY
 
     try:
-        resend.Emails.send(
+        result = resend.Emails.send(
             {
                 "from": settings.FROM_EMAIL,
                 "to": [to],
@@ -24,8 +24,10 @@ def _send(to: str, subject: str, html: str) -> None:
                 "html": html,
             }
         )
+        logger.info("Email sent to %s — id: %s", to, result.get("id", "unknown"))
     except Exception as e:
         logger.error("Failed to send email to %s: %s", to, e)
+        raise
 
 
 def send_verification_code(to: str, student_name: str, code: str) -> None:

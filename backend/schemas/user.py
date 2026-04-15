@@ -15,9 +15,7 @@ class UserRegister(BaseModel):
 
     @field_validator("email")
     @classmethod
-    def email_must_be_herts(cls, v: str) -> str:
-        if not v.lower().endswith("@herts.ac.uk"):
-            raise ValueError("Only University of Hertfordshire emails (@herts.ac.uk) are allowed")
+    def normalize_email(cls, v: str) -> str:
         return v.lower()
 
 
