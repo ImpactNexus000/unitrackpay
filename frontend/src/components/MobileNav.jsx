@@ -9,10 +9,12 @@ const studentItems = [
   { to: '/settings', label: 'Me', icon: 'me' },
 ];
 
-const adminExtra = [
+const adminItems = [
+  { to: '/dashboard', label: 'Home', icon: 'home' },
   { to: '/admin/queue', label: 'Queue', icon: 'queue' },
   { to: '/admin/students', label: 'Students', icon: 'history' },
   { to: '/admin/reports', label: 'Reports', icon: 'receipts' },
+  { to: '/settings', label: 'Me', icon: 'me' },
 ];
 
 function NavIcon({ icon, className }) {
@@ -55,11 +57,11 @@ function NavIcon({ icon, className }) {
 export default function MobileNav() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
-  const items = isAdmin ? [...studentItems, ...adminExtra] : studentItems;
+  const items = isAdmin ? adminItems : studentItems;
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50">
-      <div className={`flex justify-around items-center py-2 ${isAdmin ? 'overflow-x-auto px-1' : ''}`}>
+      <div className="flex justify-around items-center py-2">
         {items.map((item) => (
           <NavLink
             key={item.to}
