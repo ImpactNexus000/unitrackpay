@@ -47,9 +47,6 @@ def _send_code(user: User, db: Session) -> None:
         minutes=VERIFY_CODE_EXPIRY_MINUTES
     )
     db.commit()
-    print(f"\n{'='*50}")
-    print(f"  VERIFICATION CODE for {user.email}: {code}")
-    print(f"{'='*50}\n")
     send_verification_code(user.email, user.full_name, code)
 
 
