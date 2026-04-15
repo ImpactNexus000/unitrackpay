@@ -119,8 +119,46 @@ export default function PaymentHistory() {
         </button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Mobile card layout */}
+      <div className="md:hidden">
+        {data.items.length === 0 ? (
+          <div className="border border-dashed border-gray-300 rounded-xl p-8 text-center">
+            <p className="text-sm text-gray-400">No payments found</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {data.items.map((p) => (
+              <div key={p.id} className="border border-gray-200 rounded-lg p-3 bg-white">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {p.notes || p.payment_method || 'Payment'}
+                    </p>
+                    <p className="text-xs text-gray-400">{p.payment_date}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-gray-900">£{Number(p.amount).toFixed(2)}</p>
+                    <StatusBadge status={p.status} />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+                  <span>{formatMethod(p.payment_method)}</span>
+                  {p.reference && <span>Ref: {p.reference}</span>}
+                  {p.receipt_url && (
+                    <a href={p.receipt_url} target="_blank" rel="noopener noreferrer" className="text-blue-500">
+                      View receipt
+                    </a>
+                  )}
+                  {p.reviewed_by_name && <span>Verified by {p.reviewed_by_name}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-xs border-collapse">
           <thead>
             <tr className="text-gray-400 text-xs font-medium border-b">

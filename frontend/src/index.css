@@ -13,6 +13,52 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ---- App content font boost (excludes landing page) ---- */
+
+.app-content .text-xs {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.app-content .text-sm {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.app-content .text-lg {
+  font-size: 1.3125rem;
+  line-height: 1.4;
+}
+.app-content .text-xl {
+  font-size: 1.5rem;
+  line-height: 1.4;
+}
+.app-content .text-2xl {
+  font-size: 1.75rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 640px) {
+  .app-content .text-xs {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  .app-content .text-sm {
+    font-size: 1.0625rem;
+    line-height: 1.5;
+  }
+  .app-content .text-lg {
+    font-size: 1.375rem;
+    line-height: 1.4;
+  }
+  .app-content .text-xl {
+    font-size: 1.625rem;
+    line-height: 1.4;
+  }
+  .app-content .text-2xl {
+    font-size: 1.875rem;
+    line-height: 1.3;
+  }
+}
+
 /* ---- Dark mode global overrides ---- */
 
 .dark body,

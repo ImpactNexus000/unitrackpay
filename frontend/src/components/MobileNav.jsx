@@ -66,8 +66,8 @@ export default function MobileNav() {
             }`
           }
         >
-          <NavIcon icon={item.icon} className="w-5 h-5" />
-          <span className="text-[10px]">{item.label}</span>
+          <NavIcon icon={item.icon} className="w-6 h-6" />
+          <span className="text-[12px]">{item.label}</span>
         </NavLink>
       ))}
     </nav>

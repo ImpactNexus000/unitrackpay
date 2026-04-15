@@ -38,7 +38,7 @@ export default function Layout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-white dark:bg-gray-900">
+    <div className="app-content flex min-h-screen bg-white dark:bg-gray-900">
       {/* Desktop sidebar */}
       <Sidebar />
 
