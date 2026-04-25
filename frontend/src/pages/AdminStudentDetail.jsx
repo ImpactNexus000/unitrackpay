@@ -2,14 +2,18 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import client from '../api/client';
 import StatusBadge from '../components/StatusBadge';
+import { useToast } from '../context/ToastContext';
 
 export default function AdminStudentDetail() {
   const { id } = useParams();
+  const toast = useToast();
   const [data, setData] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [deleting, setDeleting] = useState(null);
 
   useEffect(() => {
     client.get(`/admin/students/${id}`).then((res) => setData(res.data));
-  }, [id]);
+  }, [id, refreshKey]);
 
   if (!data) {
     return <p className="text-sm text-gray-400">Loading student...</p>;
@@ -87,6 +91,7 @@ export default function AdminStudentDetail() {
                   <th className="text-left pb-2">Method</th>
                   <th className="text-right pb-2">Amount</th>
                   <th className="text-left pb-2">Status</th>
+                  <th className="text-right pb-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -98,6 +103,14 @@ export default function AdminStudentDetail() {
                     <td className="py-2">
                       <StatusBadge status={p.status} />
                     </td>
+                    <td className="py-2 text-right">
+                      <button
+                        onClick={() => setDeleting(p)}
+                        className="text-red-600 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -105,7 +118,67 @@ export default function AdminStudentDetail() {
           )}
         </div>
       </div>
+
+      {deleting && (
+        <DeleteModal
+          payment={deleting}
+          onClose={() => setDeleting(null)}
+          onDeleted={() => {
+            setDeleting(null);
+            setRefreshKey((k) => k + 1);
+            toast.success('Payment deleted');
+          }}
+          onError={(msg) => toast.error(msg)}
+        />
+      )}
     </div>
   );
 }
 
+function DeleteModal({ payment, onClose, onDeleted, onError }) {
+  const [deleting, setDeleting] = useState(false);
+
+  const confirm = async () => {
+    setDeleting(true);
+    try {
+      await client.delete(`/admin/payments/${payment.id}`);
+      onDeleted();
+    } catch (err) {
+      onError(err.response?.data?.detail || 'Failed to delete payment');
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl w-full max-w-sm p-5">
+        <h3 className="text-base font-semibold text-gray-900 mb-2">Delete this payment?</h3>
+        <p className="text-sm text-gray-600 mb-2">
+          You're about to delete the £{Number(payment.amount).toFixed(2)} {payment.status} payment from {payment.payment_date}.
+        </p>
+        <p className="text-sm text-red-600 font-medium mb-4">
+          This action cannot be undone.
+        </p>
+
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={deleting}
+            className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={confirm}
+            disabled={deleting}
+            className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded-lg disabled:opacity-50"
+          >
+            {deleting ? 'Deleting...' : 'Delete'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

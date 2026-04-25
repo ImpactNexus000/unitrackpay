@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
@@ -175,6 +175,23 @@ def review_payment(
     db.commit()
 
     return {"message": f"Payment {payload.action}", "payment_id": str(payment_id)}
+
+
+@router.delete("/payments/{payment_id}", status_code=status.HTTP_204_NO_CONTENT)
+def admin_delete_payment(
+    payment_id: uuid.UUID,
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    payment = db.query(Payment).filter(Payment.id == payment_id).first()
+    if not payment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Payment not found",
+        )
+    db.delete(payment)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 # --- Reports ---
