@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import client from '../api/client';
 import StatusBadge from '../components/StatusBadge';
+import { useToast } from '../context/ToastContext';
 
 function TableSkeleton() {
   return (
@@ -34,10 +35,31 @@ const STATUS_OPTIONS = [
   { value: 'rejected', label: 'Rejected' },
 ];
 
+const CATEGORY_OPTIONS = [
+  { value: '', label: '—' },
+  { value: 'tuition', label: 'Tuition' },
+  { value: 'accommodation', label: 'Accommodation' },
+  { value: 'lab', label: 'Lab fees' },
+  { value: 'library', label: 'Library' },
+  { value: 'other', label: 'Other' },
+];
+
+const METHOD_OPTIONS = [
+  { value: '', label: '—' },
+  { value: 'bank_transfer', label: 'Bank transfer' },
+  { value: 'card', label: 'Card' },
+  { value: 'online_portal', label: 'Online portal' },
+  { value: 'cash', label: 'Cash' },
+];
+
 export default function PaymentHistory() {
+  const toast = useToast();
   const [data, setData] = useState(null);
   const [filters, setFilters] = useState({ method: '', status: '', reference: '' });
   const [page, setPage] = useState(1);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [editing, setEditing] = useState(null);
+  const [deleting, setDeleting] = useState(null);
   const limit = 20;
 
   useEffect(() => {
@@ -51,7 +73,7 @@ export default function PaymentHistory() {
     client
       .get(`/me/payments/?${params.toString()}`)
       .then((res) => setData(res.data));
-  }, [filters, page]);
+  }, [filters, page, refreshKey]);
 
   if (!data) return <TableSkeleton />;
 
@@ -59,6 +81,8 @@ export default function PaymentHistory() {
     setFilters({ ...filters, [key]: e.target.value });
     setPage(1);
   };
+
+  const refresh = () => setRefreshKey((k) => k + 1);
 
   const exportCSV = () => {
     const headers = ['Date', 'Description', 'Method', 'Reference', 'Amount', 'Status', 'Verified by'];
@@ -151,6 +175,22 @@ export default function PaymentHistory() {
                   )}
                   {p.reviewed_by_name && <span>Verified by {p.reviewed_by_name}</span>}
                 </div>
+                {p.status === 'pending' && (
+                  <div className="flex gap-3 mt-3 pt-2 border-t border-gray-100">
+                    <button
+                      onClick={() => setEditing(p)}
+                      className="text-xs text-blue-600 font-medium"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => setDeleting(p)}
+                      className="text-xs text-red-600 font-medium"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -170,12 +210,13 @@ export default function PaymentHistory() {
               <th className="text-left py-2">Receipt</th>
               <th className="text-left py-2">Status</th>
               <th className="text-left py-2">Verified by</th>
+              <th className="text-right py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {data.items.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-6 text-center text-gray-400">
+                <td colSpan={9} className="py-6 text-center text-gray-400">
                   No payments found
                 </td>
               </tr>
@@ -215,6 +256,26 @@ export default function PaymentHistory() {
                       <span className="text-gray-400">—</span>
                     )}
                   </td>
+                  <td className="py-2 text-right">
+                    {p.status === 'pending' ? (
+                      <div className="flex gap-2 justify-end">
+                        <button
+                          onClick={() => setEditing(p)}
+                          className="text-blue-600 hover:underline"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setDeleting(p)}
+                          className="text-red-600 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-gray-300">—</span>
+                    )}
+                  </td>
                 </tr>
               ))
             )}
@@ -250,6 +311,32 @@ export default function PaymentHistory() {
           </button>
         </div>
       )}
+
+      {editing && (
+        <EditModal
+          payment={editing}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            setEditing(null);
+            refresh();
+            toast.success('Payment updated');
+          }}
+          onError={(msg) => toast.error(msg)}
+        />
+      )}
+
+      {deleting && (
+        <DeleteModal
+          payment={deleting}
+          onClose={() => setDeleting(null)}
+          onDeleted={() => {
+            setDeleting(null);
+            refresh();
+            toast.success('Payment deleted');
+          }}
+          onError={(msg) => toast.error(msg)}
+        />
+      )}
     </div>
   );
 }
@@ -264,3 +351,185 @@ function formatMethod(method) {
   return map[method] || method || '—';
 }
 
+function EditModal({ payment, onClose, onSaved, onError }) {
+  const [form, setForm] = useState({
+    category: payment.category || '',
+    amount: String(payment.amount ?? ''),
+    payment_date: payment.payment_date || '',
+    payment_method: payment.payment_method || '',
+    reference: payment.reference || '',
+    notes: payment.notes || '',
+  });
+  const [saving, setSaving] = useState(false);
+
+  const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await client.patch(`/me/payments/${payment.id}`, {
+        category: form.category || null,
+        amount: parseFloat(form.amount),
+        payment_date: form.payment_date,
+        payment_method: form.payment_method || null,
+        reference: form.reference || null,
+        notes: form.notes || null,
+      });
+      onSaved();
+    } catch (err) {
+      onError(err.response?.data?.detail || 'Failed to update payment');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl w-full max-w-md p-5 max-h-[90vh] overflow-y-auto">
+        <h3 className="text-base font-semibold text-gray-900 mb-1">Edit payment</h3>
+        <p className="text-xs text-gray-400 mb-4">
+          The current balance will update once you save.
+        </p>
+
+        <form onSubmit={submit} className="space-y-3">
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Category</label>
+            <select
+              value={form.category}
+              onChange={set('category')}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
+            >
+              {CATEGORY_OPTIONS.map((c) => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-1 block">Amount (£)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                required
+                value={form.amount}
+                onChange={set('amount')}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-1 block">Date</label>
+              <input
+                type="date"
+                required
+                value={form.payment_date}
+                onChange={set('payment_date')}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Method</label>
+            <select
+              value={form.payment_method}
+              onChange={set('payment_method')}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
+            >
+              {METHOD_OPTIONS.map((m) => (
+                <option key={m.value} value={m.value}>{m.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Reference</label>
+            <input
+              type="text"
+              value={form.reference}
+              onChange={set('reference')}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Notes</label>
+            <input
+              type="text"
+              value={form.notes}
+              onChange={set('notes')}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
+            />
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 px-3 py-2 text-sm bg-gray-900 text-white rounded-lg disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function DeleteModal({ payment, onClose, onDeleted, onError }) {
+  const [deleting, setDeleting] = useState(false);
+
+  const confirm = async () => {
+    setDeleting(true);
+    try {
+      await client.delete(`/me/payments/${payment.id}`);
+      onDeleted();
+    } catch (err) {
+      onError(err.response?.data?.detail || 'Failed to delete payment');
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl w-full max-w-sm p-5">
+        <h3 className="text-base font-semibold text-gray-900 mb-2">Delete this payment?</h3>
+        <p className="text-sm text-gray-600 mb-2">
+          You're about to delete the £{Number(payment.amount).toFixed(2)} payment from {payment.payment_date}.
+        </p>
+        <p className="text-sm text-red-600 font-medium mb-4">
+          This action cannot be undone.
+        </p>
+
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={deleting}
+            className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={confirm}
+            disabled={deleting}
+            className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded-lg disabled:opacity-50"
+          >
+            {deleting ? 'Deleting...' : 'Delete'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

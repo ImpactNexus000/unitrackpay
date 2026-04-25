@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, UploadFile, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -8,7 +8,7 @@ from backend.database import get_db
 from backend.dependencies import get_current_user
 from backend.models.payment import Payment
 from backend.models.user import User
-from backend.schemas.payment import PaymentCreate, PaymentListOut, PaymentOut
+from backend.schemas.payment import PaymentCreate, PaymentListOut, PaymentOut, PaymentUpdate
 from backend.services.upload import upload_receipt, validate_file
 
 router = APIRouter()
@@ -134,3 +134,61 @@ def get_payment(
             detail="Payment not found",
         )
     return _enrich_payment(payment, db)
+
+
+@router.patch("/{payment_id}", response_model=PaymentOut)
+def update_payment(
+    payment_id: uuid.UUID,
+    payload: PaymentUpdate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    payment = (
+        db.query(Payment)
+        .filter(Payment.id == payment_id, Payment.user_id == user.id)
+        .first()
+    )
+    if not payment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Payment not found",
+        )
+    if payment.status != "pending":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only pending payments can be edited",
+        )
+
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(payment, field, value)
+
+    db.commit()
+    db.refresh(payment)
+    return _enrich_payment(payment, db)
+
+
+@router.delete("/{payment_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_payment(
+    payment_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    payment = (
+        db.query(Payment)
+        .filter(Payment.id == payment_id, Payment.user_id == user.id)
+        .first()
+    )
+    if not payment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Payment not found",
+        )
+    if payment.status != "pending":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only pending payments can be deleted",
+        )
+
+    db.delete(payment)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

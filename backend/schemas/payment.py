@@ -17,6 +17,15 @@ class PaymentCreate(BaseModel):
     notes: str | None = None
 
 
+class PaymentUpdate(BaseModel):
+    category: str | None = None
+    amount: Decimal | None = None
+    payment_date: date | None = None
+    payment_method: str | None = None
+    reference: str | None = None
+    notes: str | None = None
+
+
 # --- Response schemas ---
 
 class PaymentOut(BaseModel):
