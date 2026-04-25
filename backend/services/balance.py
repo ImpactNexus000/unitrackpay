@@ -56,12 +56,17 @@ def get_balance_by_category(user_id: uuid.UUID, db: Session) -> list[dict]:
     """
     # Fee items owed, grouped by category
     owed_rows = (
-        db.query(FeeItem.category, func.sum(FeeItem.amount_due))
+        db.query(
+            FeeItem.category,
+            func.sum(FeeItem.amount_due),
+            func.sum(FeeItem.discount),
+        )
         .filter(FeeItem.user_id == user_id)
         .group_by(FeeItem.category)
         .all()
     )
     owed_by_cat = {row[0]: float(row[1]) for row in owed_rows}
+    discount_by_cat = {row[0]: float(row[2]) for row in owed_rows if row[2]}
 
     # Confirmed payments grouped by category
     confirmed_rows = (
@@ -97,6 +102,7 @@ def get_balance_by_category(user_id: uuid.UUID, db: Session) -> list[dict]:
         result.append({
             "category": cat,
             "label": CATEGORY_LABELS.get(cat, cat.title()),
+            "discount": discount_by_cat.get(cat, 0.0),
             **_build_balance(
                 owed_by_cat.get(cat, 0.0),
                 confirmed_by_cat.get(cat, 0.0),

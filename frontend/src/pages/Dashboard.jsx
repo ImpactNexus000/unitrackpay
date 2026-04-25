@@ -45,6 +45,11 @@ export default function Dashboard() {
                 <div>
                   <span className="text-gray-400">Owed: </span>
                   <span className="text-red-600 font-medium">£{cat.total_owed.toFixed(2)}</span>
+                  {cat.discount > 0 && (
+                    <p className="text-[10px] text-green-600 mt-0.5">
+                      £{cat.discount.toFixed(2)} discount applied
+                    </p>
+                  )}
                 </div>
                 <div>
                   <span className="text-gray-400">Paid: </span>
@@ -133,7 +138,12 @@ export default function Dashboard() {
             <div key={cat.category}>
               <p className="text-xs font-medium text-gray-500 mb-2 capitalize">{cat.label}</p>
               <div className="grid grid-cols-4 gap-3">
-                <MetricCard label="Total owed" value={`£${cat.total_owed.toFixed(2)}`} color="text-red-600" />
+                <MetricCard
+                  label="Total owed"
+                  value={`£${cat.total_owed.toFixed(2)}`}
+                  color="text-red-600"
+                  hint={cat.discount > 0 ? `£${cat.discount.toFixed(2)} discount applied` : null}
+                />
                 <MetricCard label="Total paid" value={`£${cat.total_confirmed.toFixed(2)}`} color="text-green-600" />
                 <MetricCard label="Remaining" value={`£${cat.remaining.toFixed(2)}`} color="text-blue-600" />
                 <MetricCard label="Pending review" value={`£${cat.total_pending.toFixed(2)}`} color="text-amber-500" />
@@ -211,11 +221,12 @@ export default function Dashboard() {
   );
 }
 
-function MetricCard({ label, value, color }) {
+function MetricCard({ label, value, color, hint }) {
   return (
     <div className="bg-gray-50 rounded-lg p-4">
       <p className="text-xs text-gray-400 mb-1">{label}</p>
       <p className={`text-xl font-medium ${color}`}>{value}</p>
+      {hint && <p className="text-[10px] text-green-600 mt-1">{hint}</p>}
     </div>
   );
 }
